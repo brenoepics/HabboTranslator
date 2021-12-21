@@ -1,0 +1,119 @@
+{
+	"env": {
+		"browser": true,
+		"es2021": true
+	},
+	"extends": ["plugin:@typescript-eslint/recommended", "plugin:@typescript-eslint/recommended-requiring-type-checking", "prettier", "prettier/@typescript-eslint"],
+	"parser": "@typescript-eslint/parser",
+	"parserOptions": {
+		"ecmaVersion": 12,
+		"sourceType": "module",
+		"project": "tsconfig.json"
+	},
+	"plugins": ["@typescript-eslint"],
+	"rules": {
+		"@typescript-eslint/ban-types": [
+			"error",
+			{
+				"types": {
+					"Object": {
+						"message": "Use object instead."
+					},
+					"String": {
+						"message": "Use primitive string instead."
+					},
+					"Number": {
+						"message": "Use primitive number instead."
+					},
+					"Boolean": {
+						"message": "Use primitive boolean instead."
+					}
+				}
+			}
+		],
+		"@typescript-eslint/explicit-member-accessibility": [
+			"error",
+			{
+				"accessibility": "explicit",
+				"overrides": {
+					"accessors": "explicit",
+					"parameterProperties": "explicit"
+				}
+			}
+		],
+		"@typescript-eslint/no-inferrable-types": [
+			"off"
+		],
+		"@typescript-eslint/array-type": [
+			"error",
+			{
+				"default": "array"
+			}
+		],
+		"@typescript-eslint/unbound-method": [
+			"warn",
+			{
+			"ignoreStatic": true
+			}
+		],
+		"@typescript-eslint/no-unsafe-member-access": ["warn"],
+		"@typescript-eslint/no-unsafe-assignment": ["warn"],
+		"@typescript-eslint/no-this-alias": ["warn"],
+		"@typescript-eslint/no-misused-promises": [
+			"error",
+			{
+				"checksVoidReturn": false
+			}
+		],
+		"@typescript-eslint/no-unsafe-call": ["off"],
+		"@typescript-eslint/no-unsafe-return": ["warn"],
+		"@typescript-eslint/no-explicit-any": ["warn"],
+		"@typescript-eslint/no-unused-vars": ["warn"],
+		"no-whitespace-before-property":["error"],
+		"no-trailing-spaces":["error"],
+		"@typescript-eslint/no-shadow": [
+			"error",
+			{
+				"hoist": "all"
+			}
+		],
+		"@typescript-eslint/no-misused-new": "error",
+		"@typescript-eslint/no-floating-promises": "error",
+		"@typescript-eslint/type-annotation-spacing": ["error",{ "after": true }],
+		"eqeqeq": ["error", "always"],
+		"guard-for-in": ["warn"],
+		"semi": ["error", "always"],
+		"id-denylist": ["error", "data", "err", "any", "cb", "callback", "i1", "test", "collection", "list", "value"],
+		"no-multiple-empty-lines": ["error"],
+		"no-new-wrappers": ["error"],
+		"prefer-const": ["error"],
+		"no-var":  ["error"],
+		"no-multi-spaces":"error",
+		"block-spacing":["error","always"],
+		"brace-style": ["error", "1tbs", { "allowSingleLine": true }],
+		"comma-spacing": ["error", { "before": false, "after": true }],
+		"semi-spacing": ["error", {"before": false, "after": false}],
+		"space-in-parens": ["error", "never"],
+		"space-before-blocks": ["error", "always"],
+		"no-return-assign": "error",
+		"no-mixed-operators": "error",
+		"no-ternary": "warn",
+		"no-nested-ternary": "error",
+		"no-unneeded-ternary": "error",
+		"prefer-exponentiation-operator": "error",
+		"arrow-spacing": ["error", { "before": true, "after": true }],
+		"func-call-spacing": ["error", "never"],
+		"key-spacing": ["error", { "afterColon": true }],
+		"@typescript-eslint/explicit-module-boundary-types": ["error", { "allowArgumentsExplicitlyTypedAsAny": true }],
+		"@typescript-eslint/explicit-function-return-type": ["error"],
+		"@typescript-eslint/typedef": [
+			"error",
+			{
+				"arrowParameter": true,
+				"memberVariableDeclaration": true,
+				"parameter": true,
+				"propertyDeclaration": true
+			}
+    	]
+	}
+}
