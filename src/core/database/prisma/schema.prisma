@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model items_base {
+  id                      Int     @id @default(autoincrement()) @db.UnsignedInt
+  sprite_id               Int     @default(0)
+  public_name             String  @default("") @db.VarChar(56)
+  item_name               String  @db.VarChar(70)
+  type                    String  @default("s") @db.VarChar(3)
+  width                   Int     @default(1)
+  length                  Int     @default(1)
+  stack_height            Float   @default(0.00)
+  allow_stack             Boolean @default(true)
+  allow_sit               Boolean @default(false)
+  allow_lay               Boolean @default(false)
+  allow_walk              Boolean @default(false)
+  allow_gift              Boolean @default(true)
+  allow_trade             Boolean @default(true)
+  allow_recycle           Boolean @default(false)
+  allow_marketplace_sell  Boolean @default(false)
+  allow_inventory_stack   Boolean @default(true)
+  interaction_type        String  @default("default") @db.VarChar(500)
+  interaction_modes_count Int     @default(1)
+  vending_ids             String  @default("0") @db.VarChar(255)
+  multiheight             String  @default("0") @db.VarChar(50)
+  customparams            String  @default("") @db.VarChar(256)
+  effect_id_male          Int     @default(0)
+  effect_id_female        Int     @default(0)
+  clothing_on_walk        String  @default("") @db.VarChar(255)
+}
+
+model catalog_items {
+  id            Int                      @id @default(autoincrement())
+  item_ids      String                   @db.VarChar(666)
+  page_id       Int
+  catalog_name  String                   @db.VarChar(100)
+  cost_credits  Int                      @default(3)
+  cost_points   Int                      @default(0)
+  points_type   Int                      @default(0)
+  amount        Int                      @default(1)
+  limited_stack Int                      @default(0)
+  limited_sells Int                      @default(0)
+  order_number  Int                      @default(1)
+  offer_id      Int                      @default(-1)
+  song_id       Int                      @default(0) @db.UnsignedInt
+  extradata     String                   @default("") @db.VarChar(500)
+  have_offer    catalog_items_have_offer @default(dbgenerated("1"))
+  club_only     catalog_items_club_only  @default(dbgenerated("0"))
+
+  @@index([catalog_name], map: "catalog_name")
+  @@index([cost_credits, cost_points, points_type], map: "costs")
+  @@index([id], map: "id")
+  @@index([page_id], map: "page_id")
+}
+
+enum catalog_items_have_offer {
+  zero @map("0")
+   um @map("1")
+}
+
+enum catalog_items_club_only {
+  zero @map("0")
+   um @map("1")
+}

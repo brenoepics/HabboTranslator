@@ -5,9 +5,12 @@ import { singleton } from 'tsyringe';
 import { parseStringPromise } from 'xml2js';
 import { js2xml, json2xml } from "xml-js";
 import { Configuration } from '../core/config/Configuration';
-import { IFurnitureData } from '../mapping/json';
+import { IFurnitureData, IFurnitureType } from '../mapping/json';
 import { FurnitureDataMapper } from '../mapping/mappers';
 import { FileUtilities } from '../utils/FileUtilities';
+import { items_base, PrismaClient } from '@prisma/client';
+import { IItemsBase } from 'mapping/json/furniture/IItemsBase';
+import { getDatabase } from '../main';
 
 @singleton()
 export class FurnitureDataTranslate extends Translator
@@ -22,6 +25,7 @@ export class FurnitureDataTranslate extends Translator
 
     public async convertAsync(args: string[] = []): Promise<void>
     {
+        const prisma = getDatabase();
         const now = Date.now();
         const spinner = ora('Preparing FurnitureData').start();
 
@@ -61,11 +65,30 @@ export class FurnitureDataTranslate extends Translator
             this.furnitureDataTo = JSON.parse(content);
         }
 
+        async function GetItems(): Promise<IItemsBase[]> {
+            const furni: IItemsBase[] = await prisma.items_base.findMany({
+                select: {
+                item_name: true,
+                id: true,
+                },
+            });
+            return furni;
+          }
+           function updateitem(item: number, catalogname: string) {
+               prisma.catalog_items.updateMany({
+                  where: { 
+                      item_ids: {
+                      equals: item.toString()
+                } },
+                  data: { catalog_name: catalogname },
+                })
+                
+            }
+
         const new_roomitems = this.furnitureDataTo.roomitemtypes.furnitype.map(furni =>  this.furnitureDataFrom.roomitemtypes.furnitype.find(furni2 => furni.classname === furni2.classname) || furni);
         const new_wallitems = this.furnitureDataTo.wallitemtypes.furnitype.map(furni =>  this.furnitureDataFrom.wallitemtypes.furnitype.find(furni2 => furni.classname === furni2.classname) || furni);
         this.furnitureDataTo.roomitemtypes.furnitype = new_roomitems;
         this.furnitureDataTo.wallitemtypes.furnitype = new_wallitems;
-
 
         const directory = FileUtilities.getDirectory(this._configuration.getValue('output.folder'), 'gamedata');
         const json = directory.path + '/FurnitureData.json';
@@ -80,6 +103,30 @@ export class FurnitureDataTranslate extends Translator
         await writeFile(json, JSON.stringify(this.furnitureDataTo), 'utf8');
         await writeFile(xml, xmls, 'utf8');
         spinner.succeed(`FurnitureData finished in ${ Date.now() - now }ms`);
+        
+        const new_items: IFurnitureType[] = [...new_roomitems, ...new_wallitems]; 
+        GetItems().then(items => {
+            const changes:IItemsBase[] = new_items.map(furni =>
+                items.find(furni2 => {if(furni.id === furni2.id){
+                    furni2.item_name = furni.name;
+                    return furni2
+                } 
+                })
+            );
+            spinner.start("Translating catalog_items...")
+            changes.forEach(async item => {
+                if(item != null){
+                 updateitem(item.id, item.item_name);
+                }
+                 
+            })
+                
+        }).catch((e) => {
+              throw e
+            }).finally(async () =>{
+                await prisma.$disconnect().then(() => { spinner.succeed(`catalog_items updated in ${ Date.now() - now }ms`); })
+                
+            })
     }
 
     private async mapXML2JSON(xml: any): Promise<IFurnitureData>

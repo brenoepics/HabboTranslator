@@ -3,10 +3,13 @@ import 'reflect-metadata';
 import { FurnitureDataTranslate } from './translate/FurnituredataTranslate';
 import { container } from 'tsyringe';
 import { Configuration } from './core/config/Configuration';
+import { PrismaClient } from '@prisma/client';
 
+let prisma = null;
 
 (async () =>
 {
+    
     checkNodeVersion();
 
     console.log(`
@@ -14,18 +17,21 @@ import { Configuration } from './core/config/Configuration';
     ░█▀█░█▀█░█▀▄░█▀▄░█░█░░░░█░░█▀▄░█▀█░█░█░▀▀█░█░░░█▀█░░█░░█░█░█▀▄
     ░▀░▀░▀░▀░▀▀░░▀▀░░▀▀▀░░░░▀░░▀░▀░▀░▀░▀░▀░▀▀▀░▀▀▀░▀░▀░░▀░░▀▀▀░▀░▀
                                                                   
-                                                                  `)
+                                                                  `);
+    
     const config = container.resolve(Configuration);
-    await config.init();
+    prisma = new PrismaClient();
+ 
+    await config.init()
     const translates = [
         FurnitureDataTranslate,
     ];
 
     const [ arg1, arg2, ...rest ] = process.argv;
 
-    for(const converterClass of translates)
+    for(const TranslatorClass of translates)
     {
-        const translate = (container.resolve<any>(converterClass) as ITranslator);
+        const translate = (container.resolve<any>(TranslatorClass) as ITranslator);
 
         await translate.convertAsync(rest);
     }
@@ -40,4 +46,8 @@ function checkNodeVersion()
     {
         throw new Error('Invalid node version: ' + version + ' please use >= 14');
     }
+}
+
+export function getDatabase(){
+return prisma;    
 }
