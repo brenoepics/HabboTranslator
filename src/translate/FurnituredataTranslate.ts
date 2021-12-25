@@ -9,8 +9,9 @@ import { IFurnitureData, IFurnitureType } from '../mapping/json';
 import { FurnitureDataMapper } from '../mapping/mappers';
 import { FileUtilities } from '../utils/FileUtilities';
 import { items_base, PrismaClient } from '@prisma/client';
-import { IItemsBase } from 'mapping/json/furniture/IItemsBase';
+import { IItemsBase } from 'mapping/json/catalog/IItemsBase';
 import { getDatabase } from '../main';
+import { http } from '../core/TranslationService/TranslationService'
 
 @singleton()
 export class FurnitureDataTranslate extends Translator
@@ -74,13 +75,13 @@ export class FurnitureDataTranslate extends Translator
             });
             return furni;
           }
-           function updateitem(item: number, catalogname: string) {
+           function updateitem(item: number, catalogname: string, offerid: number) {
                prisma.catalog_items.updateMany({
                   where: { 
                       item_ids: {
                       equals: item.toString()
                 } },
-                  data: { catalog_name: catalogname },
+                  data: { catalog_name: catalogname, offer_id: offerid },
                 })
                 
             }
@@ -109,6 +110,7 @@ export class FurnitureDataTranslate extends Translator
             const changes:IItemsBase[] = new_items.map(furni =>
                 items.find(furni2 => {if(furni.id === furni2.id){
                     furni2.item_name = furni.name;
+                    furni2.offer_id = furni.offerid;
                     return furni2
                 } 
                 })
@@ -116,7 +118,9 @@ export class FurnitureDataTranslate extends Translator
             spinner.start("Translating catalog_items...")
             changes.forEach(async item => {
                 if(item != null){
-                 updateitem(item.id, item.item_name);
+                spinner.text = (`Translating item: ${ item.id } - (${ item.item_name } OFFER_ID: ${ item.offer_id })`);
+                spinner.render();
+                 updateitem(item.id, item.item_name, item.offer_id);
                 }
                  
             })
